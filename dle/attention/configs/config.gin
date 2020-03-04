@@ -1,0 +1,3 @@
+import dle.attention.dataset
+
+dataset.create_dataset.num_examples = 300
