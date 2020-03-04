@@ -7,6 +7,7 @@ from typing import Union, Optional, Tuple, Sequence
 
 import gin
 import tensorflow as tf
+from sklearn.model_selection import train_test_split
 from tensorflow.keras.preprocessing.text import Tokenizer
 
 logger = logging.getLogger(__name__)
@@ -14,14 +15,30 @@ logger = logging.getLogger(__name__)
 
 @gin.configurable
 def create_dataset(data_path: Union[str, os.PathLike],
-                   num_examples: Optional[int] = None
-                   ) -> Tuple[tf.Tensor, Tokenizer, tf.Tensor, Tokenizer]:
+                   num_examples: Optional[int] = None,
+                   train_batch_size: int = 64,
+                   test_batch_size: int = 256,
+                   test_size: float = 0.2,
+                   ) -> Tuple[tf.data.Dataset, tf.data.Dataset, Tokenizer, Tokenizer]:
+    logger.info(f'Create dataset with:\n'
+                f'\ttrain batch size: {train_batch_size}\n'
+                f'\ttest_batch_size: {test_batch_size}\n'
+                f'\ttest_size: {test_size}\n'
+                f'\t{"Only for the first " + str(num_examples) + " sentences" if num_examples is not None else ""}')
     targ_lang, inp_lang = _load_data(data_path, num_examples)
 
-    inp_lang, inp_tokenizer = _tokenize(inp_lang)
-    targ_lang, targ_tokenizer = _tokenize(targ_lang)
+    inputs, inp_tokenizer = _tokenize(inp_lang)
+    targets, targ_tokenizer = _tokenize(targ_lang)
 
-    return inp_lang, inp_tokenizer, targ_lang, targ_tokenizer
+    inp_train, inp_val, targ_train, targ_val = train_test_split(inputs, targets,
+                                                                test_size=test_size)
+    train_dataset = (tf.data.Dataset.from_tensor_slices((inp_train, targ_train))
+                                    .shuffle(len(inp_train))
+                                    .batch(train_batch_size))
+    val_dataset = (tf.data.Dataset.from_tensor_slices((inp_val, targ_val))
+                                  .batch(test_batch_size))
+
+    return train_dataset, val_dataset, inp_tokenizer, targ_tokenizer
 
 
 def _load_data(data_path: Union[str, os.PathLike],
