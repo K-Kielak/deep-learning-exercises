@@ -1,7 +1,7 @@
 import logging
 
 
-def setup_logging(debug: bool) -> None:
+def setup_logging(debug: bool):
     level = logging.DEBUG if debug else logging.INFO
     message_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     log_formatter = logging.Formatter(fmt=message_format)
