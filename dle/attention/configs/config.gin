@@ -25,5 +25,4 @@ Seq2SeqTrainer.checkpoint_prefix = 'checkpoints/chkpt'
 # DATASET
 #dataset.create_dataset.num_examples = 3000
 dataset.create_dataset.train_batch_size = 64
-dataset.create_dataset.test_batch_size = 256
 dataset.create_dataset.test_size = 0.2

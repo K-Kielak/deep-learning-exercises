@@ -17,12 +17,10 @@ logger = logging.getLogger(__name__)
 def create_dataset(data_path: Union[str, os.PathLike],
                    num_examples: Optional[int] = None,
                    train_batch_size: int = 64,
-                   test_batch_size: int = 256,
                    test_size: float = 0.2,
                    ) -> Tuple[tf.data.Dataset, tf.data.Dataset, Tokenizer, Tokenizer]:
     logger.info(f'Create dataset with:\n'
                 f'\ttrain batch size: {train_batch_size}\n'
-                f'\ttest_batch_size: {test_batch_size}\n'
                 f'\ttest_size: {test_size}\n'
                 f'\t{"Only for the first " + str(num_examples) + " sentences" if num_examples is not None else ""}')
     targ_lang, inp_lang = _load_data(data_path, num_examples)
@@ -35,8 +33,7 @@ def create_dataset(data_path: Union[str, os.PathLike],
     train_dataset = (tf.data.Dataset.from_tensor_slices((inp_train, targ_train))
                                     .shuffle(len(inp_train))
                                     .batch(train_batch_size))
-    val_dataset = (tf.data.Dataset.from_tensor_slices((inp_val, targ_val))
-                                  .batch(test_batch_size))
+    val_dataset = tf.data.Dataset.from_tensor_slices((inp_val, targ_val))
 
     return train_dataset, val_dataset, inp_tokenizer, targ_tokenizer
 
