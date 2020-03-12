@@ -16,16 +16,17 @@ logger = logging.getLogger(__name__)
 @click.option('--config', '-c', type=click.Path(exists=True), required=True)
 @click.option('--datapath', '-d', type=click.Path(exists=True), required=True)
 @click.option('--epochs', '-e', type=int, default=10)
-def run_attention(config: str, datapath: str, epochs: int):
+@click.option('--load', '-l', is_flag=True)
+def run_attention(config: str, datapath: str, epochs: int, load: bool):
     logger.info('Running attention model...')
     gin.parse_config_file(config)
     train_dataset, val_dataset, inp_tokenizer, targ_tokenizer = create_dataset(datapath)
     encoder, decoder = create_model(len(inp_tokenizer.word_index) + 1,
                                     len(targ_tokenizer.word_index) + 1)
     trainer = Seq2SeqTrainer(encoder, decoder)
-    trainer.train(train_dataset,
-                  targ_tokenizer.word_index['<start>'],
-                  epochs)
+    if load:
+        trainer.load_trained()
+
     trainer.train(train_dataset, epochs)
     evaluate(val_dataset, inp_tokenizer, targ_tokenizer, encoder, decoder)
 
