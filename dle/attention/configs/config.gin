@@ -1,0 +1,28 @@
+import dle.attention
+import dle.attention.dataset
+import dle.attention.model
+import dle.attention.seq2seq_trainer
+import gin.tf.external_configurables
+
+
+# MODEL
+RECURRENT_UNITS = 1024
+
+Encoder.embedding_dim = 256
+Encoder.units = %RECURRENT_UNITS
+
+BahdanauAttention.units = 1024
+
+Decoder.embedding_dim = 256
+Decoder.units = %RECURRENT_UNITS
+
+
+# TRAINING
+Seq2SeqTrainer.optimizer = @tf.keras.optimizers.Adam()
+Seq2SeqTrainer.checkpoint_prefix = 'checkpoints/chkpt'
+
+
+# DATASET
+#dataset.create_dataset.num_examples = 3000
+dataset.create_dataset.train_batch_size = 64
+dataset.create_dataset.test_size = 0.2
